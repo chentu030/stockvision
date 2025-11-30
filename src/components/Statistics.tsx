@@ -69,14 +69,14 @@ const Statistics: React.FC = () => {
 
         // Always fetch stock info once
         if (stockInfo.length === 0) {
-            fetch('/data/stock_info.json')
+            fetch(`${import.meta.env.BASE_URL}data/stock_info.json`)
                 .then(res => res.json())
                 .then(data => setStockInfo(data))
                 .catch(err => console.error("Failed to load stock info:", err));
         }
 
         // Fetch Raw Stats (needed for both modes now, for enrichment)
-        fetch(`/data/raw_stats_${suffix}.json`)
+        fetch(`${import.meta.env.BASE_URL}data/raw_stats_${suffix}.json`)
             .then(res => res.json())
             .then((data: RawStatData[]) => {
                 setRawData(data);
@@ -89,7 +89,7 @@ const Statistics: React.FC = () => {
             });
 
         if (viewMode === 'rankings') {
-            fetch(`/data/rankings_${suffix}.json`)
+            fetch(`${import.meta.env.BASE_URL}data/rankings_${suffix}.json`)
                 .then(res => res.json())
                 .then((data: RankingsMap) => {
                     setRankingsData(data);

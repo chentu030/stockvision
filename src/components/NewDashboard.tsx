@@ -32,7 +32,7 @@ const NewDashboard: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('/data/brokers.csv');
+                const response = await fetch(`${import.meta.env.BASE_URL}data/brokers.csv`);
                 const csvText = await response.text();
 
                 Papa.parse(csvText, {
