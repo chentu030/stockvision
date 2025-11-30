@@ -80,8 +80,7 @@ export const SimpleScatterChart: React.FC<ScatterProps> = ({ data, xKey, yKey, x
                 data: validData.map(d => ({
                     x: d[xKey] as number,
                     y: isPercentage ? (d[yKey] as number) * 100 : (d[yKey] as number),
-                    broker: d.broker,
-                    date: d.date
+                    raw: d // Pass full object
                 })),
                 backgroundColor: color,
                 borderColor: color,
@@ -99,8 +98,16 @@ export const SimpleScatterChart: React.FC<ScatterProps> = ({ data, xKey, yKey, x
                 callbacks: {
                     label: (ctx: any) => {
                         const pt = ctx.raw;
+                        const d = pt.raw as BrokerData;
+                        const xVal = isPercentage && xKey === 'upside' ? (d[xKey] as number * 100).toFixed(2) + '%' : d[xKey];
                         const yVal = isPercentage ? pt.y.toFixed(2) + '%' : pt.y;
-                        return `${pt.broker} (${pt.date}): ${yVal}`;
+
+                        return [
+                            `券商: ${d.broker}`,
+                            `日期: ${d.date}`,
+                            `${xLabel}: ${xVal}`,
+                            `${yLabel}: ${yVal}`
+                        ];
                     }
                 }
             }
@@ -185,19 +192,20 @@ interface HistogramProps extends ChartProps {
 
 export const HistogramChart: React.FC<HistogramProps> = ({ data, dataKey, color }) => {
     const { chartData } = useMemo(() => {
-        const valid = data
-            .map(d => d[dataKey] as number)
-            .filter(v => v != null && !isNaN(v) && v > 0);
+        const valid = data.filter(d => {
+            const v = d[dataKey] as number;
+            return v != null && !isNaN(v) && v > 0;
+        });
 
-        if (valid.length === 0) return { chartData: null, labels: [] };
+        if (valid.length === 0) return { chartData: null };
 
-        const min = Math.min(...valid);
-        const max = Math.max(...valid);
+        const values = valid.map(d => d[dataKey] as number);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
 
         // Handle case where all values are the same
         if (min === max) {
             return {
-                labels: [min.toFixed(1)],
                 chartData: {
                     labels: [min.toFixed(1)],
                     datasets: [{
@@ -205,7 +213,8 @@ export const HistogramChart: React.FC<HistogramProps> = ({ data, dataKey, color 
                         data: [valid.length],
                         backgroundColor: color + '80',
                         borderColor: color,
-                        borderWidth: 1
+                        borderWidth: 1,
+                        binItems: [valid] // Store all items in first bin
                     }]
                 }
             };
@@ -216,23 +225,25 @@ export const HistogramChart: React.FC<HistogramProps> = ({ data, dataKey, color 
         const step = range / binCount;
 
         const bins = new Array(binCount).fill(0);
+        const binItems: BrokerData[][] = Array.from({ length: binCount }, () => []);
         const binLabels = [];
 
         for (let i = 0; i < binCount; i++) {
             const s = min + i * step;
             const e = s + step;
-            binLabels.push(`${s.toFixed(1)} - ${e.toFixed(1)}`);
+            binLabels.push(`${s.toFixed(2)} - ${e.toFixed(2)}`);
         }
 
-        valid.forEach(v => {
+        valid.forEach(d => {
+            const v = d[dataKey] as number;
             let idx = Math.floor((v - min) / step);
             if (idx >= binCount) idx = binCount - 1;
-            if (idx < 0) idx = 0; // Safety check
+            if (idx < 0) idx = 0;
             bins[idx]++;
+            binItems[idx].push(d);
         });
 
         return {
-            labels: binLabels,
             chartData: {
                 labels: binLabels,
                 datasets: [{
@@ -240,7 +251,8 @@ export const HistogramChart: React.FC<HistogramProps> = ({ data, dataKey, color 
                     data: bins,
                     backgroundColor: color + '80',
                     borderColor: color,
-                    borderWidth: 1
+                    borderWidth: 1,
+                    binItems: binItems // Custom property
                 }]
             }
         };
@@ -250,7 +262,25 @@ export const HistogramChart: React.FC<HistogramProps> = ({ data, dataKey, color 
 
     const options: any = {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    title: (ctx: any) => `區間: ${ctx[0].label}`,
+                    label: (ctx: any) => `數量: ${ctx.raw} 筆`,
+                    afterBody: (ctx: any) => {
+                        const idx = ctx[0].dataIndex;
+                        const items = ctx[0].dataset.binItems[idx] as BrokerData[];
+                        // Sort by date desc
+                        const sorted = [...items].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                        return sorted.map(d => {
+                            const val = d[dataKey] as number;
+                            return `${d.broker} (${d.date}): ${val.toFixed(2)} | EPS:${d.epsNext}`;
+                        });
+                    }
+                }
+            }
+        },
         scales: {
             x: { grid: { display: false } },
             y: { grid: { color: 'rgba(255,255,255,0.05)' } }
@@ -301,6 +331,7 @@ export const LatestBarChart: React.FC<LatestBarProps> = ({ data, dataKey, label,
                         data: latest.map(d => d[dataKey] as number),
                         backgroundColor: color,
                         borderRadius: 4,
+                        raw: latest // Pass full objects array to dataset for access
                     }
                 ]
             }
@@ -333,6 +364,21 @@ export const LatestBarChart: React.FC<LatestBarProps> = ({ data, dataKey, label,
                         }
                     }
                 }
+            },
+            tooltip: {
+                callbacks: {
+                    label: (ctx: any) => {
+                        const idx = ctx.dataIndex;
+                        const d = ctx.dataset.raw[idx] as BrokerData;
+                        const val = ctx.raw;
+                        return [
+                            `${d.broker}`,
+                            `${label}: ${val}`,
+                            `發佈日: ${d.date}`,
+                            `全體平均: ${average.toFixed(0)}`
+                        ];
+                    }
+                }
             }
         },
         scales: {
@@ -350,6 +396,8 @@ export const LatestBarChart: React.FC<LatestBarProps> = ({ data, dataKey, label,
 export const RatingDistribution: React.FC<ChartProps> = ({ data }) => {
     const chartData = useMemo(() => {
         const counts: Record<string, number> = {};
+        const items: Record<string, string[]> = {};
+
         // Get latest rating per broker
         const map = new Map<string, BrokerData>();
         data.forEach(d => {
@@ -365,15 +413,22 @@ export const RatingDistribution: React.FC<ChartProps> = ({ data }) => {
         Array.from(map.values()).forEach(d => {
             const r = d.rating || 'Unknown';
             counts[r] = (counts[r] || 0) + 1;
+            if (!items[r]) items[r] = [];
+            items[r].push(d.broker);
         });
 
+        const labels = Object.keys(counts);
+        const dataValues = Object.values(counts);
+        const itemValues = labels.map(l => items[l]);
+
         return {
-            labels: Object.keys(counts),
+            labels: labels,
             datasets: [{
-                data: Object.values(counts),
+                data: dataValues,
                 backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
                 borderColor: 'rgba(15, 17, 26, 0.8)',
-                borderWidth: 2
+                borderWidth: 2,
+                items: itemValues // Custom property
             }]
         };
     }, [data]);
@@ -382,7 +437,26 @@ export const RatingDistribution: React.FC<ChartProps> = ({ data }) => {
 
     const options: any = {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'right', labels: { color: '#e2e8f0' } } }
+        plugins: {
+            legend: { position: 'right', labels: { color: '#e2e8f0' } },
+            tooltip: {
+                callbacks: {
+                    label: (ctx: any) => {
+                        const idx = ctx.dataIndex;
+                        const count = ctx.raw;
+                        const label = ctx.label;
+                        const brokers = ctx.dataset.items[idx] as string[];
+
+                        // Wrap brokers if too many
+                        const brokerList = brokers.join(', ');
+                        return [
+                            `${label}: ${count} 家`,
+                            `(${brokerList})`
+                        ];
+                    }
+                }
+            }
+        }
     };
 
     return <div style={{ height: '300px' }}><Doughnut data={chartData} options={options} /></div>;
