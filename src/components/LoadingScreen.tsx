@@ -27,20 +27,24 @@ const LoadingScreen: React.FC<{ onComplete?: () => void; isLoading?: boolean }> 
                     return 100;
                 }
 
-                if (prev >= 100) {
-                    clearInterval(timer);
-                    if (onComplete) setTimeout(onComplete, 500);
-                    return 100;
-                }
-
-                // Non-linear progress for realism
+                // Normal increment
                 const increment = Math.random() * 15;
                 return Math.min(prev + increment, 100);
             });
         }, 200);
 
         return () => clearInterval(timer);
-    }, [onComplete, isLoading]);
+    }, [isLoading]);
+
+    // Separate effect to handle completion
+    useEffect(() => {
+        if (progress >= 100) {
+            const timer = setTimeout(() => {
+                if (onComplete) onComplete();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [progress, onComplete]);
 
     useEffect(() => {
         // Change text based on progress
