@@ -184,7 +184,7 @@ interface HistogramProps extends ChartProps {
 }
 
 export const HistogramChart: React.FC<HistogramProps> = ({ data, dataKey, color }) => {
-    const { chartData, labels } = useMemo(() => {
+    const { chartData } = useMemo(() => {
         const valid = data
             .map(d => d[dataKey] as number)
             .filter(v => v != null && !isNaN(v) && v > 0);

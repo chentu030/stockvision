@@ -61,6 +61,11 @@ const Dashboard: React.FC = () => {
                                 summary: row[22],
                                 epsNext: isNaN(epsNext) ? 0 : epsNext,
                                 peNext: isNaN(peNext) ? 0 : peNext,
+                                serialNumber: '',
+                                targetPriceLow: 0,
+                                targetPriceHigh: 0,
+                                forecastPeriod: '',
+                                fileSource: '',
                             };
                         });
                         // Filter out invalid data if necessary

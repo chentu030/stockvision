@@ -179,8 +179,8 @@ const Statistics: React.FC = () => {
 
         if (sortField) {
             result.sort((a, b) => {
-                let valA = a[sortField];
-                let valB = b[sortField];
+                let valA = (a as any)[sortField];
+                let valB = (b as any)[sortField];
                 if (typeof valA === 'string' && !isNaN(parseFloat(valA))) valA = parseFloat(valA);
                 if (typeof valB === 'string' && !isNaN(parseFloat(valB))) valB = parseFloat(valB);
                 if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
@@ -510,7 +510,7 @@ const Statistics: React.FC = () => {
                                 className={(viewMode === 'rankings' && selectedCategory !== 'stocks') ? 'clickable-row' : ''}
                             >
                                 {columns.map(col => {
-                                    const val = row[col.key];
+                                    const val = (row as any)[col.key];
                                     let displayVal: any = val;
                                     let className = '';
 
