@@ -1,8 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Calendar, BarChart2, List, Activity } from 'lucide-react';
 import JSZip from 'jszip';
 import Papa from 'papaparse';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    PointElement,
+} from 'chart.js';
+import { Bar, Scatter } from 'react-chartjs-2';
 import './BrokerageDashboard.scss';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    PointElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 interface BrokerageDashboardProps {
     basePath?: string;
@@ -42,17 +63,9 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
     }, []);
 
     const parseDoubleColumnCSV = (csvText: string) => {
-        // Parse CSV using PapaParse
         const results = Papa.parse(csvText, { header: false, skipEmptyLines: true });
         const rows = results.data as string[][];
-
-        // The CSV has double columns: 
-        // 序號,券商,價格,買進股數,賣出股數,,序號,券商,價格,買進股數,賣出股數
-        // Header is usually on line 3 (index 2)
-
         let dataRows: any[] = [];
-
-        // Find header row index
         let headerIndex = -1;
         for (let i = 0; i < Math.min(10, rows.length); i++) {
             if (rows[i][1] && rows[i][1].includes('券商')) {
@@ -65,8 +78,6 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
 
         for (let i = headerIndex + 1; i < rows.length; i++) {
             const row = rows[i];
-
-            // Left side (indices 0-4)
             if (row[1]) {
                 dataRows.push({
                     broker: row[1].replace(/^\d+/, '').trim(),
@@ -75,8 +86,6 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
                     sellVol: parseFloat(row[4]) || 0
                 });
             }
-
-            // Right side (indices 6-10) - assuming empty col at 5
             if (row.length > 6 && row[7]) {
                 dataRows.push({
                     broker: row[7].replace(/^\d+/, '').trim(),
@@ -86,16 +95,11 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
                 });
             }
         }
-
         return dataRows;
     };
 
     const processStockData = (rawRows: any[]) => {
-        // Calculate summary
         const brokerMap = new Map<string, BrokerSummary>();
-
-        let totalBuyVol = 0;
-        let totalSellVol = 0;
 
         rawRows.forEach(row => {
             if (!brokerMap.has(row.broker)) {
@@ -117,9 +121,6 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
             b.sellVol += row.sellVol;
             b.buyAmt += row.buyVol * row.price;
             b.sellAmt += row.sellVol * row.price;
-
-            totalBuyVol += row.buyVol;
-            totalSellVol += row.sellVol;
         });
 
         const summary = Array.from(brokerMap.values()).map(b => {
@@ -130,7 +131,6 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
             return b;
         });
 
-        // Sort by net volume descending
         summary.sort((a, b) => b.netVol - a.netVol);
 
         return {
@@ -154,13 +154,9 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
                 if (!response.ok) throw new Error('ZIP file not found');
                 const blob = await response.blob();
                 zip = await JSZip.loadAsync(blob);
-
-                // Cache the zip (careful with memory, maybe limit cache size later)
                 setZipCache(prev => new Map(prev).set(selectedDate, zip!));
             }
 
-            // Look for the CSV file
-            // The zip structure is usually YYYYMMDD/STOCK.csv
             const fileName = `${selectedDate}/${stockCode}.csv`;
             const file = zip.file(fileName);
 
@@ -168,23 +164,12 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
                 throw new Error(`Stock ${stockCode} not found in ${selectedDate} data`);
             }
 
-            // const csvText = await file.async('string'); // Unused
-
-            // Need to handle encoding... JSZip returns unicode string if we ask for 'string'.
-            // But the original file might be Big5. 
-            // JSZip 'string' method tries to decode as UTF-8 usually.
-            // If it's Big5, we might need to read as 'uint8array' and decode using TextDecoder.
-
-            // Let's try reading as Uint8Array and decoding
             const uint8Array = await file.async('uint8array');
             let decodedText = '';
-
-            // Try Big5 first (common for Taiwan stock data)
             try {
                 const decoder = new TextDecoder('big5');
                 decodedText = decoder.decode(uint8Array);
             } catch (e) {
-                // Fallback to UTF-8
                 const decoder = new TextDecoder('utf-8');
                 decodedText = decoder.decode(uint8Array);
             }
@@ -268,34 +253,152 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
     );
 };
 
-// Placeholder Sub-components
-const BrokerageCharts = ({ data }: { data: any }) => (
-    <div className="charts-view">
-        <h3>Brokerage Summary (Top 5 Buyers)</h3>
-        <div className="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Broker</th>
-                        <th>Net Vol</th>
-                        <th>Avg Buy</th>
-                        <th>Avg Sell</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.summary.slice(0, 5).map((row: any, i: number) => (
-                        <tr key={i}>
-                            <td>{row.broker}</td>
-                            <td style={{ color: row.netVol > 0 ? '#ef4444' : '#10b981' }}>{row.netVol}</td>
-                            <td>{row.avgBuyPrice.toFixed(2)}</td>
-                            <td>{row.avgSellPrice.toFixed(2)}</td>
+const BrokerageCharts = ({ data }: { data: any }) => {
+    const topBuyers = useMemo(() => {
+        return [...data.summary].sort((a: any, b: any) => b.netVol - a.netVol).slice(0, 15);
+    }, [data]);
+
+    const topSellers = useMemo(() => {
+        return [...data.summary].sort((a: any, b: any) => a.netVol - b.netVol).slice(0, 15);
+    }, [data]);
+
+    const chartOptions = {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' as const },
+            title: { display: true, text: 'Top 15 Brokers Net Buy/Sell' },
+        },
+        scales: {
+            y: {
+                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                ticks: { color: '#94a3b8' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#94a3b8' }
+            }
+        }
+    };
+
+    const chartData = {
+        labels: [...topBuyers.map((b: any) => b.broker), ...topSellers.map((b: any) => b.broker)],
+        datasets: [
+            {
+                label: 'Net Volume',
+                data: [...topBuyers.map((b: any) => b.netVol), ...topSellers.map((b: any) => b.netVol)],
+                backgroundColor: (context: any) => {
+                    const value = context.raw;
+                    return value > 0 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(16, 185, 129, 0.8)';
+                },
+            },
+        ],
+    };
+
+    // Scatter Plot Data
+    const scatterData = {
+        datasets: [
+            {
+                label: 'Brokerage Points',
+                data: data.summary.map((b: any) => ({
+                    x: b.netVol,
+                    y: (b.netVol > 0 ? b.avgBuyPrice : b.avgSellPrice) || 0,
+                    broker: b.broker // Custom property
+                })).filter((p: any) => Math.abs(p.x) > 10), // Filter out small noise
+                backgroundColor: (context: any) => {
+                    const val = context.raw?.x;
+                    return val > 0 ? 'rgba(239, 68, 68, 0.6)' : 'rgba(16, 185, 129, 0.6)';
+                },
+            }
+        ]
+    };
+
+    const scatterOptions = {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            title: { display: true, text: 'Brokerage Points (Price vs Net Volume)' },
+            tooltip: {
+                callbacks: {
+                    label: (context: any) => {
+                        const point = context.raw;
+                        return `${point.broker}: ${point.x} vol @ $${point.y.toFixed(2)}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                title: { display: true, text: 'Net Volume', color: '#94a3b8' },
+                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                ticks: { color: '#94a3b8' }
+            },
+            y: {
+                title: { display: true, text: 'Avg Price', color: '#94a3b8' },
+                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                ticks: { color: '#94a3b8' }
+            }
+        }
+    };
+
+    return (
+        <div className="charts-view">
+            <div className="chart-container">
+                <Bar options={chartOptions} data={chartData} />
+            </div>
+            <div className="chart-container" style={{ marginTop: '2rem' }}>
+                <Scatter options={scatterOptions} data={scatterData} />
+            </div>
+
+            <h3 style={{ marginTop: '2rem' }}>Top 15 Buyers</h3>
+            <div className="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Broker</th>
+                            <th>Net Vol</th>
+                            <th>Avg Buy</th>
+                            <th>Avg Sell</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {topBuyers.map((row: any, i: number) => (
+                            <tr key={i}>
+                                <td>{row.broker}</td>
+                                <td style={{ color: '#ef4444' }}>{row.netVol}</td>
+                                <td>{row.avgBuyPrice.toFixed(2)}</td>
+                                <td>{row.avgSellPrice.toFixed(2)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style={{ marginTop: '2rem' }}>Top 15 Sellers</h3>
+            <div className="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Broker</th>
+                            <th>Net Vol</th>
+                            <th>Avg Buy</th>
+                            <th>Avg Sell</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {topSellers.map((row: any, i: number) => (
+                            <tr key={i}>
+                                <td>{row.broker}</td>
+                                <td style={{ color: '#10b981' }}>{row.netVol}</td>
+                                <td>{row.avgBuyPrice.toFixed(2)}</td>
+                                <td>{row.avgSellPrice.toFixed(2)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const BrokerageScanner = () => (
     <div className="scanner-view">
