@@ -13,6 +13,7 @@ import HeroSection from './HeroSection';
 import Sidebar from './Sidebar';
 import MarketOverview from './MarketOverview';
 import Statistics from './Statistics';
+import BrokerageDashboard from './BrokerageDashboard';
 import './NewDashboard.scss';
 
 const NewDashboard: React.FC = () => {
@@ -279,6 +280,8 @@ const NewDashboard: React.FC = () => {
                                 <MarketOverview data={brokerData} />
                             ) : activeTab === 'statistics' ? (
                                 <Statistics />
+                            ) : activeTab === 'chips' ? (
+                                <BrokerageDashboard />
                             ) : (
                                 <div className="placeholder-view" style={{
                                     display: 'flex',

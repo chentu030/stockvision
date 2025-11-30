@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, TrendingUp, List, Newspaper, Settings, LogOut, FileText, Calculator, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, List, Newspaper, Settings, LogOut, FileText, Calculator, ChevronLeft, ChevronRight, Coins } from 'lucide-react';
 import './Sidebar.scss';
 
 interface SidebarProps {
@@ -21,6 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, onL
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'market', label: 'Market Overview', icon: TrendingUp },
         { id: 'statistics', label: 'Statistics', icon: Calculator },
+        { id: 'chips', label: 'Brokerage Branch', icon: Coins },
         { id: 'articles', label: 'Articles', icon: FileText },
         { id: 'watchlist', label: 'Watchlist', icon: List },
         { id: 'news', label: 'News', icon: Newspaper },
