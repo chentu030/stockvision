@@ -7,6 +7,8 @@ interface SidebarProps {
     onTabChange: (tab: string) => void;
     onLogout?: () => void;
     onLogoClick?: () => void;
+    isCollapsed: boolean;
+    setIsCollapsed: (collapsed: boolean) => void;
 }
 
 interface MenuItem {
@@ -16,13 +18,7 @@ interface MenuItem {
     subItems?: { id: string; label: string }[];
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, onLogoClick }) => {
-    const [isCollapsed, setIsCollapsed] = useState(() => {
-        if (typeof window !== 'undefined') {
-            return window.innerWidth <= 768;
-        }
-        return false;
-    });
+const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, onLogoClick, isCollapsed, setIsCollapsed }) => {
 
     const [expandedMenus, setExpandedMenus] = useState<string[]>(['fund', 'tw-stock']);
 

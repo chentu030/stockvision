@@ -34,6 +34,12 @@ const NewDashboard: React.FC = () => {
     // Removed viewMode state
     const [activeTab, setActiveTab] = useState('home'); // Default to home
     const [selectedCompany, setSelectedCompany] = useState('2330');
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return window.innerWidth <= 768;
+        }
+        return false;
+    });
 
     // Date Filter State
     const [startDate, setStartDate] = useState('');
@@ -204,17 +210,19 @@ const NewDashboard: React.FC = () => {
 
     return (
         <div className="new-dashboard">
-            <div className="dashboard-layout" style={{ display: 'flex', width: '100%', minHeight: '100vh' }}>
+            <div className="dashboard-layout" style={{ display: 'flex', width: '100%', height: '100vh', overflow: 'hidden' }}>
                 <Sidebar
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
                     onLogout={() => setActiveTab('home')}
                     onLogoClick={() => setActiveTab('home')}
+                    isCollapsed={isCollapsed}
+                    setIsCollapsed={setIsCollapsed}
                 />
 
-                <div className="dashboard-container" style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+                <div className="dashboard-container" style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                     {activeTab === 'home' ? (
-                        <div style={{ height: '100%', width: '100%' }}>
+                        <div style={{ height: '100%', width: '100%', overflowY: 'auto' }}>
                             <HeroSection onSearch={handleSearch} />
                         </div>
                     ) : (
@@ -256,9 +264,9 @@ const NewDashboard: React.FC = () => {
                                 )}
                             </header>
 
-                            <main className="dashboard-content">
+                            <main className="dashboard-content" style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
                                 {activeTab === 'dashboard' ? (
-                                    <div className="analysis-view">
+                                    <div className="analysis-view" style={{ height: '100%', overflowY: 'auto' }}>
                                         <div className="company-header">
                                             <button className="back-btn" onClick={() => setActiveTab('home')}>
                                                 <ArrowRight style={{ transform: 'rotate(180deg)' }} />

@@ -1,14 +1,12 @@
 ﻿.sidebar {
     width: 280px;
-    height: 100vh;
+    height: 100%;
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
     padding: 2rem 1.5rem;
-    position: sticky;
-    top: 0;
     z-index: 50;
     transition: width 0.3s ease;
     overflow: hidden; // Prevent main scrollbar
@@ -197,8 +195,7 @@
                 content: '';
                 position: absolute;
                 left: 1.5rem;
-                top: 0;
-                bottom: 0;
+                            bottom: 0;
                 width: 1px;
                 background: rgba(255, 255, 255, 0.1);
                 display: none; // Optional: Guide line
@@ -309,8 +306,7 @@
     .sidebar {
         position: fixed;
         left: 0;
-        top: 0;
-        bottom: 0;
+            bottom: 0;
         height: 100vh;
         z-index: 1000;
         width: 280px; // Expanded width
