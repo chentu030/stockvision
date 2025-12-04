@@ -1,8 +1,10 @@
 ﻿.sidebar {
     width: 280px;
     height: 100vh;
-    position: sticky;
+    position: fixed;
+    left: 0;
     top: 0;
+    bottom: 0;
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255, 255, 255, 0.05);

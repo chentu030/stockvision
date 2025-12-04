@@ -211,7 +211,7 @@ const NewDashboard: React.FC = () => {
 
     return (
         <div className="new-dashboard">
-            <div className="dashboard-layout" style={{ display: 'flex', width: '100%', height: '100dvh', overflow: 'hidden' }}>
+            <div className={`dashboard-layout ${isCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`} style={{ display: 'flex', width: '100%', height: '100dvh', overflow: 'hidden' }}>
                 <Sidebar
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
