@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Papa from 'papaparse';
-import { Search, ArrowRight, ChevronDown, ChevronUp, Calendar, Filter, ChevronLeft, Upload } from 'lucide-react';
+import { Search, ArrowRight, ChevronDown, ChevronUp, Calendar, Filter, Upload } from 'lucide-react';
 import { useBrokerageData } from '../hooks/useBrokerageData';
 import {
     SimpleScatterChart,

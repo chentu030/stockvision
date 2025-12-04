@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import './MarketOverview.scss'; // Reuse styles
 
 interface RankingData {
@@ -57,7 +57,7 @@ interface StatisticsProps {
 
 const Statistics: React.FC<StatisticsProps> = ({ filters, setFilters }) => {
     const { viewMode, timePeriod, selectedSheet, selectedCategory, searchQuery, selectedTimeframes } = filters;
-    const { setViewMode, setTimePeriod, setSelectedSheet, setSelectedCategory, setSearchQuery, setSelectedTimeframes, setAvailableSheets } = setFilters;
+    const { setSelectedSheet, setAvailableSheets } = setFilters;
     const [rankingsData, setRankingsData] = useState<RankingsMap>({});
     const [rawData, setRawData] = useState<RawStatData[]>([]);
     const [stockInfo, setStockInfo] = useState<StockInfo[]>([]);
@@ -306,14 +306,7 @@ const Statistics: React.FC<StatisticsProps> = ({ filters, setFilters }) => {
         setIsModalOpen(true);
     };
 
-    const categories: { key: keyof SheetData; label: string }[] = [
-        { key: 'stocks', label: 'Individual Stocks' },
-        { key: 'industries', label: 'Industry' },
-        { key: 'sub_industries', label: 'Sub-industry' },
-        { key: 'related_industries', label: 'Related Industry' },
-        { key: 'related_groups', label: 'Related Group' },
-        { key: 'industry_types', label: 'Industry Type' },
-    ];
+
 
     // Helper to get columns for modal based on selectedSheet
     const getModalColumns = () => {

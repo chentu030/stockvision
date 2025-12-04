@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Calendar, BarChart2, List, Activity, Upload, ChevronDown, ChevronUp } from 'lucide-react';
-import JSZip from 'jszip';
+import React, { useState, useMemo } from 'react';
+import { BarChart2, List, Activity } from 'lucide-react';
+
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -46,17 +46,7 @@ interface BrokerageDashboardProps {
     basePath?: string;
 }
 
-interface BrokerSummary {
-    broker: string;
-    buyVol: number;
-    sellVol: number;
-    buyAmt: number;
-    sellAmt: number;
-    netVol: number;
-    netAmt: number;
-    avgBuyPrice: number;
-    avgSellPrice: number;
-}
+
 
 
 

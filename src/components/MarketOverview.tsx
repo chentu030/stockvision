@@ -28,7 +28,7 @@ type SortOrder = 'asc' | 'desc';
 
 const ITEMS_PER_PAGE = 50;
 
-const MarketOverview: React.FC<MarketOverviewProps> = ({ data, filters, setFilters }) => {
+const MarketOverview: React.FC<MarketOverviewProps> = ({ data, filters }) => {
     // Local state for sorting and pagination only
     const [sortField, setSortField] = useState<SortField>('date');
     const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
