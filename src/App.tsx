@@ -1,8 +1,11 @@
 import NewDashboard from './components/NewDashboard';
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
-    <NewDashboard />
+    <ThemeProvider>
+      <NewDashboard />
+    </ThemeProvider>
   );
 }
 

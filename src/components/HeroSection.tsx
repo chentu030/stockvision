@@ -18,40 +18,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
         }
     };
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        const { clientX, clientY, currentTarget } = e;
-        const { width, height } = currentTarget.getBoundingClientRect();
-        const x = (clientX / width) - 0.5;
-        const y = (clientY / height) - 0.5;
-
-        // Calculate velocity
-        const prevX = parseFloat(currentTarget.style.getPropertyValue('--mouse-x-px') || '0');
-        const prevY = parseFloat(currentTarget.style.getPropertyValue('--mouse-y-px') || '0');
-        const deltaX = Math.abs(clientX - prevX);
-        const deltaY = Math.abs(clientY - prevY);
-        const velocity = Math.min((deltaX + deltaY) / 10, 10); // Cap velocity
-
-        currentTarget.style.setProperty('--mouse-x', x.toString());
-        currentTarget.style.setProperty('--mouse-y', y.toString());
-        currentTarget.style.setProperty('--mouse-x-px', `${clientX}px`);
-        currentTarget.style.setProperty('--mouse-y-px', `${clientY}px`);
-        currentTarget.style.setProperty('--mouse-velocity', velocity.toString());
-    };
-
     return (
-        <div className="hero-section" onMouseMove={handleMouseMove}>
-            <div className="spotlight"></div>
-            <div className="background-effects">
-                <div className="stars"></div>
-                <div className="shooting-stars">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <div className="grid-overlay"></div>
-                <div className="glow-orb orb-1"></div>
-                <div className="glow-orb orb-2"></div>
-            </div>
+        <div className="hero-section">
+            <div className="background-pattern"></div>
 
             <motion.div
                 className="hero-content"
@@ -61,7 +30,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
             >
                 <motion.div
                     className="badge"
-                    initial={{ opacity: 0, scale: 0.8 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
                 >
@@ -71,7 +40,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
 
                 <h1 className="title">
                     <span className="block">Market</span>
-                    <span className="block gradient-text">Vision</span>
+                    <span className="block highlight">Vision</span>
                 </h1>
 
                 <p className="subtitle">
@@ -80,7 +49,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
                 </p>
 
                 <form className={`hero-search ${isFocused ? 'focused' : ''}`} onSubmit={handleSubmit}>
-                    <Search className="search-icon" size={24} />
+                    <Search className="search-icon" size={20} />
                     <input
                         type="text"
                         placeholder="Enter stock code (e.g. 2330)"
@@ -90,30 +59,30 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
                         onBlur={() => setIsFocused(false)}
                     />
                     <button type="submit" className="search-btn" disabled={!query.trim()}>
-                        <ArrowRight size={20} />
+                        <ArrowRight size={18} />
                     </button>
                 </form>
 
                 <div className="features">
                     <motion.div
                         className="feature-item"
-                        whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.08)' }}
+                        whileHover={{ y: -5 }}
                     >
-                        <TrendingUp size={20} className="icon" />
+                        <TrendingUp size={18} className="icon" />
                         <span>Upside Analysis</span>
                     </motion.div>
                     <motion.div
                         className="feature-item"
-                        whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.08)' }}
+                        whileHover={{ y: -5 }}
                     >
-                        <Activity size={20} className="icon" />
+                        <Activity size={18} className="icon" />
                         <span>Broker Ratings</span>
                     </motion.div>
                     <motion.div
                         className="feature-item"
-                        whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.08)' }}
+                        whileHover={{ y: -5 }}
                     >
-                        <BarChart2 size={20} className="icon" />
+                        <BarChart2 size={18} className="icon" />
                         <span>Historical Data</span>
                     </motion.div>
                 </div>

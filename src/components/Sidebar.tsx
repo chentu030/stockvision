@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { List, Newspaper, Settings, LogOut, FileText, ChevronLeft, ChevronRight, Home, PieChart, ChevronDown, ChevronUp, LineChart } from 'lucide-react';
+import { List, Newspaper, Settings, LogOut, FileText, ChevronLeft, ChevronRight, Home, PieChart, ChevronDown, ChevronUp, LineChart, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import './Sidebar.scss';
 
 interface SidebarProps {
@@ -19,7 +20,7 @@ interface MenuItem {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, onLogoClick, isCollapsed, setIsCollapsed }) => {
-
+    const { theme, toggleTheme } = useTheme();
     const [expandedMenus, setExpandedMenus] = useState<string[]>(['fund', 'tw-stock']);
 
     const toggleSubMenu = (menuId: string) => {
@@ -141,6 +142,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, onL
             </nav>
 
             <div className="sidebar-footer">
+                <button className="theme-toggle" onClick={toggleTheme} title={isCollapsed ? `Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode` : ''}>
+                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    {!isCollapsed && <span className="label">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
+                </button>
                 <button className="nav-item logout" onClick={onLogout} title={isCollapsed ? "Logout" : ''}>
                     <LogOut size={20} />
                     {!isCollapsed && <span className="label">Logout</span>}

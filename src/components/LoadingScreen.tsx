@@ -8,26 +8,17 @@ const LoadingScreen: React.FC<{ onComplete?: () => void; isLoading?: boolean }> 
 
     const loadingTexts = [
         "Initializing System...",
-        "Connecting to Market Data Feed...",
+        "Connecting to Market Data...",
         "Analyzing Broker Reports...",
-        "Calibrating AI Models...",
+        "Calibrating Models...",
         "System Ready."
     ];
 
     useEffect(() => {
         const timer = setInterval(() => {
             setProgress(prev => {
-                // If still loading externally, cap at 90%
-                if (isLoading && prev >= 90) {
-                    return 90;
-                }
-
-                // If loading finished (isLoading is false) and we are at or above 90, go to 100
-                if (!isLoading && prev >= 90) {
-                    return 100;
-                }
-
-                // Normal increment
+                if (isLoading && prev >= 90) return 90;
+                if (!isLoading && prev >= 90) return 100;
                 const increment = Math.random() * 15;
                 return Math.min(prev + increment, 100);
             });
@@ -36,7 +27,6 @@ const LoadingScreen: React.FC<{ onComplete?: () => void; isLoading?: boolean }> 
         return () => clearInterval(timer);
     }, [isLoading]);
 
-    // Separate effect to handle completion
     useEffect(() => {
         if (progress >= 100) {
             const timer = setTimeout(() => {
@@ -47,7 +37,6 @@ const LoadingScreen: React.FC<{ onComplete?: () => void; isLoading?: boolean }> 
     }, [progress, onComplete]);
 
     useEffect(() => {
-        // Change text based on progress
         if (progress < 30) setTextIndex(0);
         else if (progress < 50) setTextIndex(1);
         else if (progress < 70) setTextIndex(2);
@@ -60,16 +49,15 @@ const LoadingScreen: React.FC<{ onComplete?: () => void; isLoading?: boolean }> 
             <div className="loading-content">
                 <motion.div
                     className="logo-container"
-                    initial={{ opacity: 0, scale: 0.8 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <div className="logo-ring"></div>
                     <h1 className="logo-text">Market<span>Vision</span></h1>
                 </motion.div>
 
                 <div className="progress-container">
-                    <div className="progress-bar">
+                    <div className="progress-line">
                         <motion.div
                             className="progress-fill"
                             style={{ width: `${progress}%` }}
@@ -85,9 +73,9 @@ const LoadingScreen: React.FC<{ onComplete?: () => void; isLoading?: boolean }> 
                     <AnimatePresence mode="wait">
                         <motion.p
                             key={textIndex}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
+                            exit={{ opacity: 0, y: -5 }}
                             transition={{ duration: 0.2 }}
                             className="status-text"
                         >
@@ -95,12 +83,6 @@ const LoadingScreen: React.FC<{ onComplete?: () => void; isLoading?: boolean }> 
                         </motion.p>
                     </AnimatePresence>
                 </div>
-            </div>
-
-            <div className="background-effects">
-                <div className="grid-overlay"></div>
-                <div className="glow-orb orb-1"></div>
-                <div className="glow-orb orb-2"></div>
             </div>
         </div>
     );
