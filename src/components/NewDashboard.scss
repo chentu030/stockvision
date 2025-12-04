@@ -29,18 +29,6 @@
     --bg-secondary: #f8fafc;
     --bg-tertiary: #f1f5f9;
     --text-primary: #000000; // Pure black for maximum contrast
-    --text-secondary: #334155; // Darker slate (Slate 700)
-    --text-tertiary: #64748b; // Slate 500
-    --border-color: #e2e8f0; // Solid color for better visibility
-    --accent-color: #000000;
-    --accent-hover: #333333;
-
-    --card-bg: rgba(255, 255, 255, 0.95);
-}
-
-.new-dashboard {
-    min-height: 100vh;
-    background-color: var(--bg-primary);
     color: var(--text-primary);
     font-family: 'Lora', serif;
     display: flex;
