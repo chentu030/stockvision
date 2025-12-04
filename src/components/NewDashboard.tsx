@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Papa from 'papaparse';
-import { Search, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight, Filter, X } from 'lucide-react';
 import {
     SimpleScatterChart,
     HistogramChart,
@@ -40,6 +40,7 @@ const NewDashboard: React.FC = () => {
         }
         return false;
     });
+    const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
 
     // Date Filter State
     const [startDate, setStartDate] = useState('');
@@ -210,7 +211,7 @@ const NewDashboard: React.FC = () => {
 
     return (
         <div className="new-dashboard">
-            <div className="dashboard-layout" style={{ display: 'flex', width: '100%', height: '100vh', overflow: 'hidden' }}>
+            <div className="dashboard-layout" style={{ display: 'flex', width: '100%', height: '100dvh', overflow: 'hidden' }}>
                 <Sidebar
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
@@ -232,9 +233,16 @@ const NewDashboard: React.FC = () => {
                                     <h1>{getPageTitle(activeTab)}</h1>
                                 </div>
 
+                                <button
+                                    className="header-toggle"
+                                    onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
+                                >
+                                    {isHeaderExpanded ? <X size={20} /> : <Filter size={20} />}
+                                </button>
+
                                 {activeTab === 'dashboard' && (
-                                    <div className="filters" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                                        <div className="date-range" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: '#94a3b8' }}>
+                                    <div className={`filters ${isHeaderExpanded ? 'expanded' : ''}`}>
+                                        <div className="date-range">
                                             <input
                                                 type="date"
                                                 value={startDate}
