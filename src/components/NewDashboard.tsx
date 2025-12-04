@@ -273,7 +273,7 @@ const NewDashboard: React.FC = () => {
                                 )}
                             </header>
 
-                            <main className="dashboard-content" style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+                            <main className="dashboard-content" style={{ flex: 1, overflow: 'hidden', position: 'relative', minHeight: 0 }}>
                                 {activeTab === 'dashboard' ? (
                                     <div className="analysis-view" style={{ height: '100%', overflowY: 'auto' }}>
                                         <div className="company-header">
