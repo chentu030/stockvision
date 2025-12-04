@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Papa from 'papaparse';
-import { Search, ArrowRight, Filter, X } from 'lucide-react';
+import { Search, ArrowRight, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
 import {
     SimpleScatterChart,
     HistogramChart,
@@ -233,12 +233,13 @@ const NewDashboard: React.FC = () => {
                                     <h1>{getPageTitle(activeTab)}</h1>
                                 </div>
 
-                                <button
-                                    className="header-toggle"
+                                <div
+                                    className="filter-toggle-bar"
                                     onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
                                 >
-                                    {isHeaderExpanded ? <X size={20} /> : <Filter size={20} />}
-                                </button>
+                                    <span>Show Filters</span>
+                                    {isHeaderExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                </div>
 
                                 {activeTab === 'dashboard' && (
                                     <div className={`filters ${isHeaderExpanded ? 'expanded' : ''}`}>

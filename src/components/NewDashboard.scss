@@ -47,7 +47,8 @@
         top: 0;
         z-index: 100;
 
-        .header-toggle {
+        .header-toggle,
+        .filter-toggle-bar {
             display: none; // Hidden on desktop
         }
 
@@ -574,25 +575,25 @@
             height: auto;
             position: relative;
 
-            .header-toggle {
+            .filter-toggle-bar {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
+                gap: 0.5rem;
+                width: 100%;
+                padding: 0.5rem;
                 background: rgba(255, 255, 255, 0.05);
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                color: var(--text-primary);
+                border-radius: 8px;
+                color: #94a3b8;
+                font-size: 0.9rem;
                 cursor: pointer;
-                position: absolute;
-                right: 1rem;
-                top: 0.75rem;
-                z-index: 20;
-                transition: all 0.2s ease;
+                transition: all 0.2s;
+                margin-bottom: 0.5rem;
 
                 &:hover {
                     background: rgba(255, 255, 255, 0.1);
+                    color: #fff;
                 }
             }
 

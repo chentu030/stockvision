@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Calendar, BarChart2, List, Activity, Upload } from 'lucide-react';
+import { Search, Calendar, BarChart2, List, Activity, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import JSZip from 'jszip';
 import {
     Chart as ChartJS,
@@ -1197,6 +1197,7 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
                         style={{ display: 'none' }}
                     />
                 </label>
+                </div>
             </div>
 
             <div className="sub-tabs">
@@ -1235,7 +1236,7 @@ const BrokerageDashboard: React.FC<BrokerageDashboardProps> = ({ basePath: _base
                     </>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

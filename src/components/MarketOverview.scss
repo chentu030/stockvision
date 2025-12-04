@@ -20,6 +20,14 @@
         position: relative; // Added for z-index context
         z-index: 20; // Ensure dropdowns appear above table
 
+        .filter-toggle-bar {
+            display: none; // Hidden on desktop
+        }
+
+        .filters-content {
+            display: contents; // Default to normal flow on desktop
+        }
+
         .filter-group {
             display: flex;
             align-items: center;
@@ -421,6 +429,76 @@
                         word-wrap: break-word;
                     }
                 }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .filters-bar {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 0.5rem;
+            gap: 0.5rem;
+
+            .filter-toggle-bar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                width: 100%;
+                padding: 0.5rem;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                color: #94a3b8;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.2s;
+
+                &:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    color: #fff;
+                }
+            }
+
+            .filters-content {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+                width: 100%;
+                max-height: 0;
+                overflow: hidden;
+                opacity: 0;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+                &.expanded {
+                    max-height: 500px; // Enough space for all filters
+                    opacity: 1;
+                    padding-top: 0.5rem;
+                }
+            }
+
+            .filter-group {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+
+                .label {
+                    margin-bottom: 0.25rem;
+                }
+
+                .search-input,
+                .filter-select,
+                .date-input,
+                .number-input {
+                    width: 100%;
+                }
+            }
+
+            .result-count {
+                width: 100%;
+                text-align: center;
+                margin-top: 0.5rem;
             }
         }
     }
