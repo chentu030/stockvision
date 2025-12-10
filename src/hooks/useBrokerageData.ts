@@ -25,7 +25,7 @@ export const useBrokerageData = () => {
     const [zipCache, setZipCache] = useState<Map<string, JSZip>>(new Map());
 
     useEffect(() => {
-        fetch(`${import.meta.env.BASE_URL}data/chips/dates.json`)
+        fetch(`${import.meta.env.BASE_URL}data/chips/dates.json?t=${new Date().getTime()}`)
             .then(res => res.json())
             .then(data => {
                 const sortedDates = data.sort((a: string, b: string) => b.localeCompare(a));
