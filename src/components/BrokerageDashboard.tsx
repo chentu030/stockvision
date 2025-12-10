@@ -797,8 +797,22 @@ const BrokerageCharts = ({ data, topN }: { data: any, topN: number }) => {
 
     // const scatterChartWidth = Math.max(typeof window !== 'undefined' ? window.innerWidth - 40 : 1024, topActive.length * 40);
 
+    const concentrationPieOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'top' as const },
+            tooltip: {
+                callbacks: {
+                    label: (context: any) => `${context.label}: ${context.raw} vol`
+                }
+            }
+        }
+    };
+
     return (
         <div className="charts-view">
+            {/* ... other code ... */}
             <div className="chart-scroll-container">
                 <div className="chart-wrapper" style={{ height: `${chartHeight}px`, width: '100%' }}>
                     <Bar options={barChartOptions} data={finalBarData} />
@@ -833,13 +847,13 @@ const BrokerageCharts = ({ data, topN }: { data: any, topN: number }) => {
                 <div style={{ flex: 1, minWidth: '300px' }}>
                     <h4 style={{ textAlign: 'center', color: 'var(--text-primary)', marginBottom: '1rem' }}>Buy Concentration</h4>
                     <div className="chart-wrapper" style={{ height: '400px', width: '100%' }}>
-                        <Pie data={concentrationDataBuy} />
+                        <Pie data={concentrationDataBuy} options={concentrationPieOptions} />
                     </div>
                 </div>
                 <div style={{ flex: 1, minWidth: '300px' }}>
                     <h4 style={{ textAlign: 'center', color: 'var(--text-primary)', marginBottom: '1rem' }}>Sell Concentration</h4>
                     <div className="chart-wrapper" style={{ height: '400px', width: '100%' }}>
-                        <Pie data={concentrationDataSell} />
+                        <Pie data={concentrationDataSell} options={concentrationPieOptions} />
                     </div>
                 </div>
             </div>
