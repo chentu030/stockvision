@@ -147,8 +147,20 @@ export const useBrokerageData = () => {
                         setZipCache(prev => new Map(prev).set(date, zip!));
                     }
 
-                    const fileName = `${date}/${stockCode}.csv`;
-                    const file = zip.file(fileName);
+                    let fileName = `${date}/${stockCode}.csv`;
+                    let file = zip.file(fileName);
+
+                    if (!file) {
+                        // OTC stocks might use format: Code_Date.csv (e.g., 8299_20251209.csv)
+                        fileName = `${date}/${stockCode}_${date}.csv`;
+                        file = zip.file(fileName);
+                    }
+
+                    if (!file) {
+                        // Some OTC might purely be Code_Date.csv without parent folder if structure varies (just in case)
+                        fileName = `${stockCode}_${date}.csv`;
+                        file = zip.file(fileName);
+                    }
 
                     if (!file) return;
 
