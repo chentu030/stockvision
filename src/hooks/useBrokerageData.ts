@@ -157,6 +157,29 @@ export const useBrokerageData = () => {
                     }
 
                     if (!file) {
+                        // Try ROC Date format (e.g. 1141111 for 20251111)
+                        // user reported: 1240_1141111.csv
+                        try {
+                            const year = parseInt(date.substring(0, 4));
+                            const monthDay = date.substring(4);
+                            const rocYear = year - 1911;
+                            const rocDate = `${rocYear}${monthDay}`;
+
+                            // Try with folder
+                            fileName = `${date}/${stockCode}_${rocDate}.csv`;
+                            file = zip.file(fileName);
+
+                            if (!file) {
+                                // Try without folder (just in case)
+                                fileName = `${stockCode}_${rocDate}.csv`;
+                                file = zip.file(fileName);
+                            }
+                        } catch (e) {
+                            console.warn('Failed to convert to ROC date', e);
+                        }
+                    }
+
+                    if (!file) {
                         // Some OTC might purely be Code_Date.csv without parent folder if structure varies (just in case)
                         fileName = `${stockCode}_${date}.csv`;
                         file = zip.file(fileName);
