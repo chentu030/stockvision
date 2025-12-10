@@ -170,83 +170,89 @@ export const useBrokerageData = () => {
 
             const allRows: any[] = [];
 
-            await Promise.all(targetDates.map(async (date) => {
-                try {
-                    let zip = zipCache.get(date);
+            const BATCH_SIZE = 5;
+            for (let i = 0; i < targetDates.length; i += BATCH_SIZE) {
+                const batch = targetDates.slice(i, i + BATCH_SIZE);
+                // console.log(`Processing batch ${i / BATCH_SIZE + 1}/${Math.ceil(targetDates.length / BATCH_SIZE)}`);
 
-                    if (!zip) {
-                        const response = await fetch(`${import.meta.env.BASE_URL}data/chips/${date}.zip`);
-                        if (!response.ok) return;
-                        const blob = await response.blob();
-                        zip = await JSZip.loadAsync(blob);
-                        setZipCache(prev => new Map(prev).set(date, zip!));
-                    }
-
-                    let fileName = `${date}/${stockCode}.csv`;
-                    let file = zip.file(fileName);
-
-                    if (!file) {
-                        // OTC stocks might use format: Code_Date.csv (e.g., 8299_20251209.csv)
-                        fileName = `${date}/${stockCode}_${date}.csv`;
-                        file = zip.file(fileName);
-                    }
-
-                    if (!file) {
-                        // Try ROC Date format (e.g. 1141111 for 20251111)
-                        // user reported: 1240_1141111.csv
-                        try {
-                            const year = parseInt(date.substring(0, 4));
-                            const monthDay = date.substring(4);
-                            const rocYear = year - 1911;
-                            const rocDate = `${rocYear}${monthDay}`;
-
-                            // Try with folder
-                            fileName = `${date}/${stockCode}_${rocDate}.csv`;
-                            file = zip.file(fileName);
-
-                            if (!file) {
-                                // Try without folder (just in case)
-                                fileName = `${stockCode}_${rocDate}.csv`;
-                                file = zip.file(fileName);
-                            }
-                        } catch (e) {
-                            console.warn('Failed to convert to ROC date', e);
-                        }
-                    }
-
-                    if (!file) {
-                        // Some OTC might purely be Code_Date.csv without parent folder if structure varies (just in case)
-                        fileName = `${stockCode}_${date}.csv`;
-                        file = zip.file(fileName);
-                    }
-
-                    if (!file) return;
-
-                    const uint8Array = await file.async('uint8array');
-                    let decodedText = '';
+                await Promise.all(batch.map(async (date) => {
                     try {
-                        const decoder = new TextDecoder('big5', { fatal: true });
-                        decodedText = decoder.decode(uint8Array);
-                    } catch (e) {
-                        const decoder = new TextDecoder('utf-8');
-                        decodedText = decoder.decode(uint8Array);
-                    }
+                        let zip = zipCache.get(date);
 
-                    let dayRows = [];
-                    // Detect file type
-                    if (decodedText.includes('券商買賣證券成交價量資訊')) {
-                        dayRows = parseOTCcsv(decodedText);
-                    } else {
-                        dayRows = parseDoubleColumnCSV(decodedText);
-                    }
-                    for (const row of dayRows) {
-                        allRows.push(row);
-                    }
+                        if (!zip) {
+                            const response = await fetch(`${import.meta.env.BASE_URL}data/chips/${date}.zip`);
+                            if (!response.ok) return;
+                            const blob = await response.blob();
+                            zip = await JSZip.loadAsync(blob);
+                            setZipCache(prev => new Map(prev).set(date, zip!));
+                        }
 
-                } catch (err) {
-                    console.warn(`Failed to process ${date}:`, err);
-                }
-            }));
+                        let fileName = `${date}/${stockCode}.csv`;
+                        let file = zip.file(fileName);
+
+                        if (!file) {
+                            // OTC stocks might use format: Code_Date.csv (e.g., 8299_20251209.csv)
+                            fileName = `${date}/${stockCode}_${date}.csv`;
+                            file = zip.file(fileName);
+                        }
+
+                        if (!file) {
+                            // Try ROC Date format (e.g. 1141111 for 20251111)
+                            // user reported: 1240_1141111.csv
+                            try {
+                                const year = parseInt(date.substring(0, 4));
+                                const monthDay = date.substring(4);
+                                const rocYear = year - 1911;
+                                const rocDate = `${rocYear}${monthDay}`;
+
+                                // Try with folder
+                                fileName = `${date}/${stockCode}_${rocDate}.csv`;
+                                file = zip.file(fileName);
+
+                                if (!file) {
+                                    // Try without folder (just in case)
+                                    fileName = `${stockCode}_${rocDate}.csv`;
+                                    file = zip.file(fileName);
+                                }
+                            } catch (e) {
+                                console.warn('Failed to convert to ROC date', e);
+                            }
+                        }
+
+                        if (!file) {
+                            // Some OTC might purely be Code_Date.csv without parent folder if structure varies (just in case)
+                            fileName = `${stockCode}_${date}.csv`;
+                            file = zip.file(fileName);
+                        }
+
+                        if (!file) return;
+
+                        const uint8Array = await file.async('uint8array');
+                        let decodedText = '';
+                        try {
+                            const decoder = new TextDecoder('big5', { fatal: true });
+                            decodedText = decoder.decode(uint8Array);
+                        } catch (e) {
+                            const decoder = new TextDecoder('utf-8');
+                            decodedText = decoder.decode(uint8Array);
+                        }
+
+                        let dayRows = [];
+                        // Detect file type
+                        if (decodedText.includes('券商買賣證券成交價量資訊')) {
+                            dayRows = parseOTCcsv(decodedText);
+                        } else {
+                            dayRows = parseDoubleColumnCSV(decodedText);
+                        }
+                        for (const row of dayRows) {
+                            allRows.push(row);
+                        }
+
+                    } catch (err) {
+                        console.warn(`Failed to process ${date}:`, err);
+                    }
+                }));
+            }
 
             if (allRows.length === 0) {
                 throw new Error(`Stock ${stockCode} not found in selected range`);
